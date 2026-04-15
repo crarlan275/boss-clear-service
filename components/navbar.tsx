@@ -68,13 +68,13 @@ export function Navbar({ profile }: NavbarProps) {
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <DropdownMenuTrigger render={
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
               <Avatar className="h-8 w-8">
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </Button>
-          </DropdownMenuTrigger>
+          } />
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col">
@@ -83,22 +83,22 @@ export function Navbar({ profile }: NavbarProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard">Mis Clears</Link>
+            <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+              Mis Clears
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/weekly">Semana Actual</Link>
+            <DropdownMenuItem onClick={() => router.push('/weekly')}>
+              Semana Actual
             </DropdownMenuItem>
             {profile.role === 'admin' && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/admin">Panel Admin</Link>
+                <DropdownMenuItem onClick={() => router.push('/admin')}>
+                  Panel Admin
                 </DropdownMenuItem>
               </>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+            <DropdownMenuItem onClick={handleSignOut} variant="destructive">
               Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

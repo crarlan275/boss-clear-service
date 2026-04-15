@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -78,12 +79,12 @@ export default async function AdminPage() {
             <p className="text-sm text-muted-foreground">
               Publica qué bosses completaste esta semana.
             </p>
-            <Button asChild className="w-full">
-              <Link href="/admin/weekly">Publicar Semana</Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/admin/weekly/history">Ver Historial</Link>
-            </Button>
+            <Link href="/admin/weekly" className={cn(buttonVariants(), 'w-full')}>
+              Publicar Semana
+            </Link>
+            <Link href="/admin/weekly/history" className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}>
+              Ver Historial
+            </Link>
           </CardContent>
         </Card>
 
@@ -95,12 +96,12 @@ export default async function AdminPage() {
             <p className="text-sm text-muted-foreground">
               Gestiona clientes y sus registros de clears.
             </p>
-            <Button asChild className="w-full">
-              <Link href="/admin/clients">Ver Clientes</Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/admin/records/new">Agregar Clear</Link>
-            </Button>
+            <Link href="/admin/clients" className={cn(buttonVariants(), 'w-full')}>
+              Ver Clientes
+            </Link>
+            <Link href="/admin/records/new" className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}>
+              Agregar Clear
+            </Link>
           </CardContent>
         </Card>
 
@@ -112,9 +113,9 @@ export default async function AdminPage() {
             <p className="text-sm text-muted-foreground">
               Agrega o edita los bosses disponibles en el servicio.
             </p>
-            <Button asChild className="w-full">
-              <Link href="/admin/bosses">Gestionar Bosses</Link>
-            </Button>
+            <Link href="/admin/bosses" className={cn(buttonVariants(), 'w-full')}>
+              Gestionar Bosses
+            </Link>
           </CardContent>
         </Card>
       </div>

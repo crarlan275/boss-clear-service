@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import { AddBossForm } from './add-boss-form'
 import { ToggleBossButton } from './toggle-boss-button'
 
@@ -21,9 +22,9 @@ export default async function BossesPage() {
           <h1 className="text-2xl font-bold">Catálogo de Bosses</h1>
           <p className="text-muted-foreground">Administra los bosses disponibles en el servicio.</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/admin">← Volver</Link>
-        </Button>
+        <Link href="/admin" className={cn(buttonVariants({ variant: 'outline' }))}>
+          ← Volver
+        </Link>
       </div>
 
       <AddBossForm />

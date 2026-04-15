@@ -2,11 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import Link from 'next/link'
 import type { ClientRecordWithDetails } from '@/lib/types'
 import { PromoteButton } from './promote-button'
 
@@ -36,7 +37,6 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   const typedRecords = (records ?? []) as ClientRecordWithDetails[]
 
-  // Get current user to prevent self-demotion
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
@@ -50,12 +50,15 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           {user?.id !== profile.id && (
             <PromoteButton profileId={profile.id} currentRole={profile.role} />
           )}
-          <Button asChild>
-            <Link href={`/admin/records/new?client=${profile.id}`}>+ Agregar Clear</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/admin/clients">← Volver</Link>
-          </Button>
+          <Link
+            href={`/admin/records/new?client=${profile.id}`}
+            className={cn(buttonVariants())}
+          >
+            + Agregar Clear
+          </Link>
+          <Link href="/admin/clients" className={cn(buttonVariants({ variant: 'outline' }))}>
+            ← Volver
+          </Link>
         </div>
       </div>
 

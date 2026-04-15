@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 
 export default function HomePage() {
   return (
@@ -11,12 +12,12 @@ export default function HomePage() {
           de clears y los bosses completados cada semana.
         </p>
         <div className="flex gap-4 justify-center">
-          <Button asChild size="lg">
-            <Link href="/register">Crear cuenta</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/login">Iniciar sesión</Link>
-          </Button>
+          <Link href="/register" className={cn(buttonVariants({ size: 'lg' }))}>
+            Crear cuenta
+          </Link>
+          <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}>
+            Iniciar sesión
+          </Link>
         </div>
       </div>
     </div>

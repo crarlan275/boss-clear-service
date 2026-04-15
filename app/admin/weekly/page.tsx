@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import { WeeklyPostForm } from './weekly-post-form'
 
 export default async function WeeklyAdminPage() {
@@ -24,12 +25,12 @@ export default async function WeeklyAdminPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link href="/admin/weekly/history">Ver Historial</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/admin">← Volver</Link>
-          </Button>
+          <Link href="/admin/weekly/history" className={cn(buttonVariants({ variant: 'outline' }))}>
+            Ver Historial
+          </Link>
+          <Link href="/admin" className={cn(buttonVariants({ variant: 'outline' }))}>
+            ← Volver
+          </Link>
         </div>
       </div>
 

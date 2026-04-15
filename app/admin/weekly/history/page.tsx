@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 
 function formatDate(dateStr: string) {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', {
@@ -27,9 +28,9 @@ export default async function WeeklyHistoryPage() {
           <h1 className="text-2xl font-bold">Historial Semanal</h1>
           <p className="text-muted-foreground">Todos los posts semanales publicados.</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/admin/weekly">← Volver</Link>
-        </Button>
+        <Link href="/admin/weekly" className={cn(buttonVariants({ variant: 'outline' }))}>
+          ← Volver
+        </Link>
       </div>
 
       {posts?.length === 0 && (

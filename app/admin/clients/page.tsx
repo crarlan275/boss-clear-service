@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('es-ES', {
@@ -30,9 +31,9 @@ export default async function ClientsPage() {
           <h1 className="text-2xl font-bold">Clientes</h1>
           <p className="text-muted-foreground">{clients.length} clientes registrados.</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/admin">← Volver</Link>
-        </Button>
+        <Link href="/admin" className={cn(buttonVariants({ variant: 'outline' }))}>
+          ← Volver
+        </Link>
       </div>
 
       <Card>
@@ -59,12 +60,18 @@ export default async function ClientsPage() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button asChild size="sm">
-                      <Link href={`/admin/clients/${client.id}`}>Ver Clears</Link>
-                    </Button>
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/admin/records/new?client=${client.id}`}>+ Clear</Link>
-                    </Button>
+                    <Link
+                      href={`/admin/clients/${client.id}`}
+                      className={cn(buttonVariants({ size: 'sm' }))}
+                    >
+                      Ver Clears
+                    </Link>
+                    <Link
+                      href={`/admin/records/new?client=${client.id}`}
+                      className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
+                    >
+                      + Clear
+                    </Link>
                   </div>
                 </div>
               ))}

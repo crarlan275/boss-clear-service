@@ -48,7 +48,8 @@ export function AddRecordForm({ clients, bosses, weeklyPosts, preselectedClientI
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { toast.error('No autenticado.'); setLoading(false); return }
 
-    const { error } = await supabase.from('client_records').insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from('client_records').insert({
       client_id: clientId,
       boss_id: bossId,
       weekly_post_id: weeklyPostId === 'none' ? null : weeklyPostId,
@@ -72,7 +73,7 @@ export function AddRecordForm({ clients, bosses, weeklyPosts, preselectedClientI
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>Cliente</Label>
-            <Select value={clientId} onValueChange={setClientId}>
+            <Select value={clientId} onValueChange={(val) => val && setClientId(val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona cliente..." />
               </SelectTrigger>
@@ -86,7 +87,7 @@ export function AddRecordForm({ clients, bosses, weeklyPosts, preselectedClientI
 
           <div className="space-y-2">
             <Label>Boss</Label>
-            <Select value={bossId} onValueChange={setBossId}>
+            <Select value={bossId} onValueChange={(val) => val && setBossId(val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona boss..." />
               </SelectTrigger>
@@ -113,7 +114,7 @@ export function AddRecordForm({ clients, bosses, weeklyPosts, preselectedClientI
 
           <div className="space-y-2">
             <Label>Semana asociada (opcional)</Label>
-            <Select value={weeklyPostId} onValueChange={setWeeklyPostId}>
+            <Select value={weeklyPostId} onValueChange={(val) => val && setWeeklyPostId(val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Sin semana" />
               </SelectTrigger>

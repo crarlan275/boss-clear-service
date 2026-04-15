@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import { AddRecordForm } from './add-record-form'
 
 export default async function NewRecordPage({
@@ -29,9 +29,9 @@ export default async function NewRecordPage({
           <h1 className="text-2xl font-bold">Agregar Clear</h1>
           <p className="text-muted-foreground">Registra un boss clear para un cliente.</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href="/admin/clients">← Volver</Link>
-        </Button>
+        <Link href="/admin/clients" className={cn(buttonVariants({ variant: 'outline' }))}>
+          ← Volver
+        </Link>
       </div>
 
       <AddRecordForm

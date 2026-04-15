@@ -28,7 +28,8 @@ export function AddBossForm() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.from('bosses').insert({ name, difficulty })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from('bosses').insert({ name, difficulty })
 
     if (error) {
       toast.error('Error al agregar boss.')
@@ -60,7 +61,7 @@ export function AddBossForm() {
           </div>
           <div className="w-40 space-y-2">
             <Label>Dificultad</Label>
-            <Select value={difficulty} onValueChange={setDifficulty}>
+            <Select value={difficulty} onValueChange={(val) => val && setDifficulty(val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Dificultad" />
               </SelectTrigger>
