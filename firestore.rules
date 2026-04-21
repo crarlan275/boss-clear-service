@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+             get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isPilot() {
+      let p = get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
+      return request.auth != null && (
+        p.role == 'pilot' ||
+        p.role == 'admin' ||
+        p.isPilot == true
+      );
+    }
+
+    // Profiles: cada usuario lee/escribe el suyo; admin accede a todos;
+    // piloto lee sus clientes; cliente lee a su piloto asignado
+    match /profiles/{userId} {
+      allow read: if isAuth() && (
+        request.auth.uid == userId ||
+        isAdmin() ||
+        (isPilot() && resource.data.pilotId == request.auth.uid) ||
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.pilotId == userId
+      );
+      allow write: if isAuth() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Bosses: cualquier autenticado lee; solo admin escribe
+    match /bosses/{bossId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // Weekly posts: cualquier autenticado lee; solo admin escribe
+    match /weekly_posts/{postId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // Client records: usuario lee los suyos; piloto lee los de sus clientes; admin/piloto escriben
+    match /client_records/{recordId} {
+      allow read: if isAuth() && (
+        resource.data.clientId == request.auth.uid ||
+        isAdmin() ||
+        (isPilot() && get(/databases/$(database)/documents/profiles/$(resource.data.clientId)).data.pilotId == request.auth.uid)
+      );
+      allow write: if isAdmin() || isPilot();
+    }
+
+    // Maple characters: dueño o admin CRUD; piloto puede leer chars de sus clientes
+    match /maple_characters/{charId} {
+      allow read: if isAuth() && (
+        resource == null ||
+        resource.data.ownerId == request.auth.uid ||
+        isAdmin() ||
+        (isPilot() && get(/databases/$(database)/documents/profiles/$(resource.data.ownerId)).data.pilotId == request.auth.uid)
+      );
+      allow create: if isAuth() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuth() && (
+        resource.data.ownerId == request.auth.uid ||
+        isAdmin() ||
+        (isPilot() && get(/databases/$(database)/documents/profiles/$(resource.data.ownerId)).data.pilotId == request.auth.uid)
+      );
+      allow delete: if isAuth() && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    // Pilot applications: usuario lee/crea la suya; admin gestiona todas
+    match /pilot_applications/{appId} {
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

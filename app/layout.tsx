@@ -1,11 +1,21 @@
 import type { Metadata } from 'next'
-import { Geist } from 'next/font/google'
+import { Cinzel, Nunito } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
+import { AuthProvider } from '@/lib/auth-context'
+import { LangProvider } from '@/lib/i18n'
+import { SparkleBackground } from '@/components/sparkle-bg'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const cinzel = Cinzel({
+  variable: '--font-cinzel',
   subsets: ['latin'],
+  weight: ['400', '600', '700', '900'],
+})
+
+const nunito = Nunito({
+  variable: '--font-nunito',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -15,10 +25,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster />
+    <html lang="es" className={`${cinzel.variable} ${nunito.variable} h-full antialiased`}>
+      <body className="relative min-h-full flex flex-col">
+        <LangProvider>
+          <AuthProvider>
+            <SparkleBackground />
+            <div className="relative z-10 flex min-h-full flex-col">
+              {children}
+            </div>
+            <Toaster />
+          </AuthProvider>
+        </LangProvider>
       </body>
     </html>
   )

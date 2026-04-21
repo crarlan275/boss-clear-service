@@ -1,123 +1,73 @@
-export type Role = 'client' | 'admin'
+export type Role = 'client' | 'admin' | 'pilot'
 
-export type Database = {
-  public: {
-    Tables: {
-      profiles: {
-        Row: {
-          id: string
-          email: string
-          display_name: string
-          role: Role
-          created_at: string
-        }
-        Insert: {
-          id: string
-          email: string
-          display_name?: string
-          role?: Role
-          created_at?: string
-        }
-        Update: {
-          display_name?: string
-          role?: Role
-        }
-      }
-      bosses: {
-        Row: {
-          id: string
-          name: string
-          difficulty: string
-          is_active: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          difficulty: string
-          is_active?: boolean
-          created_at?: string
-        }
-        Update: {
-          name?: string
-          difficulty?: string
-          is_active?: boolean
-        }
-      }
-      weekly_posts: {
-        Row: {
-          id: string
-          week_start: string
-          notes: string | null
-          created_by: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          week_start: string
-          notes?: string | null
-          created_by: string
-          created_at?: string
-        }
-        Update: {
-          notes?: string | null
-        }
-      }
-      weekly_post_bosses: {
-        Row: {
-          id: string
-          weekly_post_id: string
-          boss_id: string
-        }
-        Insert: {
-          id?: string
-          weekly_post_id: string
-          boss_id: string
-        }
-        Update: Record<string, never>
-      }
-      client_records: {
-        Row: {
-          id: string
-          client_id: string
-          boss_id: string
-          weekly_post_id: string | null
-          cleared_at: string
-          notes: string | null
-          added_by: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          boss_id: string
-          weekly_post_id?: string | null
-          cleared_at: string
-          notes?: string | null
-          added_by: string
-          created_at?: string
-        }
-        Update: {
-          notes?: string | null
-          cleared_at?: string
-        }
-      }
-    }
-  }
+export interface Profile {
+  id: string
+  email: string
+  displayName: string
+  role: Role
+  createdAt: string
+  avatarUrl?: string
+  pilotId?: string              // UID del piloto asignado (solo aplica a clientes)
+  isPilot?: boolean             // true si tiene permisos de piloto (puede coexistir con role: 'admin')
+  discordId?: string            // Discord User ID para notificaciones (ej: "123456789012345678")
+  notificationsEnabled?: boolean // Si el cliente quiere recibir DMs de Discord al completar un boss
 }
 
-// Convenience types
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Boss = Database['public']['Tables']['bosses']['Row']
-export type WeeklyPost = Database['public']['Tables']['weekly_posts']['Row']
-export type WeeklyPostBoss = Database['public']['Tables']['weekly_post_bosses']['Row']
-export type ClientRecord = Database['public']['Tables']['client_records']['Row']
+export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Chaos' | 'Extreme'
 
-export type WeeklyPostWithBosses = WeeklyPost & {
-  weekly_post_bosses: Array<{ boss_id: string; bosses: Boss }>
+export interface Boss {
+  id: string
+  name: string
+  difficulty: Difficulty
+  isActive: boolean
+  price: number
+  createdAt: string
+  imageUrl?: string
 }
 
-export type ClientRecordWithDetails = ClientRecord & {
-  bosses: Boss
-  weekly_posts: WeeklyPost | null
+/** Personaje de MapleStory registrado por un cliente */
+export interface MapleCharacter {
+  id: string              // document ID = character_name.toLowerCase()
+  name: string
+  class: string
+  level: number
+  world: string
+  imageUrl: string
+  ownerId: string         // Firebase user UID del dueño
+  ownerDisplayName: string
+  canBlink: boolean       // Toggle que activa el admin
+  selectedBossIds: string[] // Bosses que el cliente quiere clearear
+  bossesLocked: boolean   // Si true, el cliente no puede cambiar bosses
+  createdAt: string
+}
+
+export interface WeeklyPost {
+  id: string
+  weekStart: string
+  notes: string | null
+  createdBy: string
+  createdAt: string
+  bossIds: string[]
+}
+
+export interface ClientRecord {
+  id: string
+  clientId: string
+  charId?: string          // ID del maple_character al que pertenece el clear
+  bossId: string
+  weeklyPostId: string | null
+  clearedAt: string
+  notes: string | null
+  imageUrls?: string[]
+  /** Firebase Storage path — para borrar la imagen al expirar */
+  imagePath?: string | null
+  /** ISO timestamp de subida — imágenes >14 días se eliminan automáticamente */
+  imageUploadedAt?: string | null
+  addedBy: string
+  createdAt: string
+}
+
+export interface ClientRecordWithDetails extends ClientRecord {
+  boss: Boss
+  weeklyPost: WeeklyPost | null
 }
