@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
 
     // Enviar mensaje de prueba
     const embed = {
-      title: '🔔 Notificaciones activas',
+      title: '🔔 Notifications enabled',
       color: 0xfbbf24,
-      description: `¡Hola **${displayName}**! Las notificaciones de **Boss Clear Service** están configuradas correctamente.\n\nRecibirás un mensaje como este cada vez que tu piloto complete un boss. ⚔️`,
+      description: `Hello **${displayName}**! **Boss Clear Service** notifications are set up correctly.\n\nYou'll receive a message like this every time your pilot completes a boss. ⚔️`,
       footer: { text: 'Boss Clear Service — BCS' },
       timestamp: new Date().toISOString(),
     }

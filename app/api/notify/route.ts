@@ -77,20 +77,20 @@ export async function POST(req: NextRequest) {
       Extreme: 0x9b59b6,
     }
 
-    const dateStr = new Date(clearedAt + 'T00:00:00').toLocaleDateString('es-ES', {
+    const dateStr = new Date(clearedAt + 'T00:00:00').toLocaleDateString('en-US', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     })
 
     const embed = {
-      title: '⚔️ Boss Completado',
+      title: '⚔️ Boss Cleared',
       color: diffColors[difficulty] ?? 0xfbbf24,
-      description: `Tu piloto acaba de registrar un boss clear. ¡Sigue así! 🎉`,
+      description: `Your pilot just registered a boss clear. Keep it up! 🎉`,
       fields: [
         { name: '🐉 Boss', value: `**${bossName}**`, inline: true },
-        { name: '⚡ Dificultad', value: difficulty || '—', inline: true },
-        { name: '🧙 Personaje', value: characterName || '—', inline: true },
-        { name: '📅 Fecha', value: dateStr, inline: false },
-        ...(notes ? [{ name: '📝 Nota del piloto', value: notes, inline: false }] : []),
+        { name: '⚡ Difficulty', value: difficulty || '—', inline: true },
+        { name: '🧙 Character', value: characterName || '—', inline: true },
+        { name: '📅 Date', value: dateStr, inline: false },
+        ...(notes ? [{ name: '📝 Pilot note', value: notes, inline: false }] : []),
       ],
       footer: { text: 'Boss Clear Service — BCS' },
       timestamp: new Date().toISOString(),
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     await sendDiscordDM(
       profile.discordId,
-      `¡Hola **${profile.displayName}**!`,
+      `Hello **${profile.displayName}**!`,
       [embed]
     )
 
