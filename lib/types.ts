@@ -11,6 +11,7 @@ export interface Profile {
   isPilot?: boolean             // true si tiene permisos de piloto (puede coexistir con role: 'admin')
   discordId?: string            // Discord User ID para notificaciones (ej: "123456789012345678")
   notificationsEnabled?: boolean // Si el cliente quiere recibir DMs de Discord al completar un boss
+  lang?: 'es' | 'en'           // Idioma preferido del cliente
 }
 
 export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Chaos' | 'Extreme'

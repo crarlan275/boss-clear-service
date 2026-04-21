@@ -9,6 +9,8 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 import { useLang } from '@/lib/i18n'
 import type { Profile } from '@/lib/types'
 
@@ -73,7 +75,11 @@ export function Navbar({ profile }: { profile: Profile }) {
         <div className="flex items-center gap-2">
           {/* Language toggle */}
           <button
-            onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
+            onClick={() => {
+              const next = lang === 'es' ? 'en' : 'es'
+              setLang(next)
+              updateDoc(doc(db, 'profiles', profile.id), { lang: next }).catch(() => {})
+            }}
             className="flex items-center gap-1.5 rounded border border-border/40 bg-background/40 px-2.5 py-1 text-xs font-bold tracking-wider text-muted-foreground transition-all hover:border-amber-400/40 hover:text-amber-400"
             title={lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}
           >

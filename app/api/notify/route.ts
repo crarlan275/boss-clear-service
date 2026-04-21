@@ -68,6 +68,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ skipped: true })
     }
 
+    const es = profile.lang !== 'en'
+
     // Colores por dificultad
     const diffColors: Record<string, number> = {
       Easy: 0x57f287,
@@ -77,20 +79,22 @@ export async function POST(req: NextRequest) {
       Extreme: 0x9b59b6,
     }
 
-    const dateStr = new Date(clearedAt + 'T00:00:00').toLocaleDateString('en-US', {
+    const dateStr = new Date(clearedAt + 'T00:00:00').toLocaleDateString(es ? 'es-ES' : 'en-US', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     })
 
     const embed = {
-      title: '⚔️ Boss Cleared',
+      title: es ? '⚔️ Boss Completado' : '⚔️ Boss Cleared',
       color: diffColors[difficulty] ?? 0xfbbf24,
-      description: `Your pilot just registered a boss clear. Keep it up! 🎉`,
+      description: es
+        ? `Tu piloto acaba de registrar un boss clear. ¡Sigue así! 🎉`
+        : `Your pilot just registered a boss clear. Keep it up! 🎉`,
       fields: [
         { name: '🐉 Boss', value: `**${bossName}**`, inline: true },
-        { name: '⚡ Difficulty', value: difficulty || '—', inline: true },
-        { name: '🧙 Character', value: characterName || '—', inline: true },
-        { name: '📅 Date', value: dateStr, inline: false },
-        ...(notes ? [{ name: '📝 Pilot note', value: notes, inline: false }] : []),
+        { name: es ? '⚡ Dificultad' : '⚡ Difficulty', value: difficulty || '—', inline: true },
+        { name: es ? '🧙 Personaje' : '🧙 Character', value: characterName || '—', inline: true },
+        { name: es ? '📅 Fecha' : '📅 Date', value: dateStr, inline: false },
+        ...(notes ? [{ name: es ? '📝 Nota del piloto' : '📝 Pilot note', value: notes, inline: false }] : []),
       ],
       footer: { text: 'Boss Clear Service — BCS' },
       timestamp: new Date().toISOString(),
@@ -99,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     await sendDiscordDM(
       profile.discordId,
-      `Hello **${profile.displayName}**!`,
+      es ? `¡Hola **${profile.displayName}**!` : `Hello **${profile.displayName}**!`,
       [embed]
     )
 
