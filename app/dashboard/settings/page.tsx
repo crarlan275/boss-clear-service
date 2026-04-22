@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { doc, updateDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuth } from '@/lib/auth-context'
+import { useLang } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,8 @@ import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const { user, profile } = useAuth()
+  const { lang, t } = useLang()
+  const s = t.settings
   const [discordId, setDiscordId] = useState('')
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -34,43 +37,31 @@ export default function SettingsPage() {
     if (!user) return
     setSaving(true)
     try {
-      await updateDoc(doc(db, 'profiles', user.uid), {
-        discordId: discordId.trim(),
-        notificationsEnabled,
-      })
-      toast.success('Configuración guardada.')
+      await updateDoc(doc(db, 'profiles', user.uid), { discordId: discordId.trim(), notificationsEnabled })
+      toast.success(s.saved)
     } catch {
-      toast.error('Error al guardar.')
+      toast.error(s.saveError)
     } finally {
       setSaving(false)
     }
   }
 
   async function handleTest() {
-    if (!user || !discordId.trim()) {
-      toast.error('Ingresa tu Discord ID primero.')
-      return
-    }
+    if (!user || !discordId.trim()) { toast.error(s.noId); return }
     setTesting(true)
     try {
       const { auth } = await import('@/lib/firebase')
       const idToken = await auth.currentUser?.getIdToken()
       const res = await fetch('/api/notify/test', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ discordId: discordId.trim(), displayName: profile?.displayName ?? 'Usuario' }),
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discordId: discordId.trim(), displayName: profile?.displayName ?? 'User' }),
       })
       const data = await res.json()
-      if (res.ok) {
-        toast.success('¡Mensaje de prueba enviado! Revisa tus DMs en Discord.')
-      } else {
-        toast.error(`Error: ${data.error ?? 'No se pudo enviar'}`)
-      }
+      if (res.ok) toast.success(s.testOk)
+      else toast.error(`Error: ${data.error ?? s.testError}`)
     } catch {
-      toast.error('Error al enviar prueba.')
+      toast.error(s.testError)
     } finally {
       setTesting(false)
     }
@@ -80,14 +71,11 @@ export default function SettingsPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="relative overflow-hidden rounded-xl border border-amber-400/15 bg-card/60 p-6 backdrop-blur-sm">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ background: 'radial-gradient(ellipse 60% 120% at 100% 50%, rgba(180,140,30,0.09) 0%, transparent 70%)' }}
-        />
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 120% at 100% 50%, rgba(180,140,30,0.09) 0%, transparent 70%)' }} />
         <div className="relative">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-amber-400/70 mb-1">Cuenta</p>
-          <h1 className="font-cinzel text-3xl font-bold text-foreground">Configuración</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Gestiona tus preferencias de notificaciones.</p>
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-amber-400/70 mb-1">{s.account}</p>
+          <h1 className="font-cinzel text-3xl font-bold text-foreground">{s.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{s.subtitle}</p>
         </div>
       </div>
 
@@ -98,25 +86,22 @@ export default function SettingsPage() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-[#5865F2]">
               <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
             </svg>
-            Notificaciones de Discord
+            {s.discordTitle}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
 
-          {/* Explicación */}
+          {/* How it works */}
           <div className="rounded-lg border border-[#5865F2]/20 bg-[#5865F2]/[0.06] px-4 py-3 space-y-2">
-            <p className="text-sm font-semibold text-[#7289da]">¿Cómo funciona?</p>
+            <p className="text-sm font-semibold text-[#7289da]">{s.howTitle}</p>
             <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
-              <li>
-                Abre el bot en Discord y escríbele <span className="font-semibold text-foreground">cualquier mensaje</span> (ej: "hola") —
-                esto activa los DMs entre tú y el bot sin necesidad de unirte a ningún servidor.
-              </li>
-              <li>Copia tu <span className="font-semibold text-foreground">Discord User ID</span> y pégalo aquí abajo.</li>
-              <li>Activa las notificaciones — recibirás un DM cada vez que tu piloto complete un boss.</li>
+              <li>{s.how1}</li>
+              <li>{s.how2}</li>
+              <li>{s.how3}</li>
             </ol>
           </div>
 
-          {/* Botón para abrir DM con el bot */}
+          {/* Step 1 — Open bot chat */}
           <a
             href="https://discord.com/users/1494464099113894129"
             target="_blank"
@@ -127,26 +112,26 @@ export default function SettingsPage() {
               <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
             </svg>
             <div>
-              <p className="text-sm font-semibold text-[#7289da]">Paso 1 — Abrir chat con el bot</p>
-              <p className="text-xs text-muted-foreground">Haz clic aquí → escríbele cualquier mensaje al bot</p>
+              <p className="text-sm font-semibold text-[#7289da]">{s.step1Label}</p>
+              <p className="text-xs text-muted-foreground">{s.step1Sub}</p>
             </div>
             <span className="ml-auto text-[#5865F2] text-xs">↗</span>
           </a>
 
-          {/* Cómo obtener el Discord ID */}
+          {/* Step 2 — Get Discord ID */}
           <div className="rounded-lg border border-border/40 bg-background/30 px-4 py-3 space-y-1.5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Paso 2 — ¿Cómo obtener tu Discord ID?</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{s.step2Title}</p>
             <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Abre Discord → Ajustes <span className="text-foreground">⚙️</span> → Avanzado → Activa <span className="text-foreground font-semibold">Modo Desarrollador</span></li>
-              <li>Haz clic derecho en <span className="text-foreground font-semibold">tu nombre de usuario</span> → <span className="text-foreground font-semibold">Copiar ID de usuario</span></li>
-              <li>Pega el número en el campo de abajo (solo dígitos · ej: <span className="font-mono text-amber-400">123456789012345678</span>)</li>
+              <li>{s.step2a} <span className="text-foreground font-semibold">{s.step2aDev}</span></li>
+              <li>{s.step2b} <span className="text-foreground font-semibold">{s.step2bName}</span> → <span className="text-foreground font-semibold">{s.step2bCopy}</span></li>
+              <li>{s.step2c} <span className="font-mono text-amber-400">123456789012345678</span>)</li>
             </ol>
           </div>
 
-          {/* Discord ID input */}
+          {/* Step 3 — Discord ID input */}
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Paso 3 — Tu Discord User ID
+              {s.step3Label}
             </label>
             <div className="flex gap-3">
               <Input
@@ -158,18 +143,18 @@ export default function SettingsPage() {
               />
               {discordId.length >= 17 && (
                 <Badge className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 self-center">
-                  ✓ Válido
+                  {s.valid}
                 </Badge>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground/60">Solo números · entre 17 y 19 dígitos</p>
+            <p className="text-[11px] text-muted-foreground/60">{s.step3Hint}</p>
           </div>
 
-          {/* Toggle notificaciones */}
+          {/* Step 4 — Toggle notifications */}
           <div className="flex items-center justify-between rounded-lg border border-border/40 bg-background/30 px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-foreground">Paso 4 — Activar notificaciones</p>
-              <p className="text-xs text-muted-foreground">DM en Discord cuando tu piloto complete un boss</p>
+              <p className="text-sm font-semibold text-foreground">{s.step4Label}</p>
+              <p className="text-xs text-muted-foreground">{s.step4Sub}</p>
             </div>
             <button
               onClick={() => setNotificationsEnabled(!notificationsEnabled)}
@@ -177,40 +162,27 @@ export default function SettingsPage() {
                 notificationsEnabled ? 'bg-emerald-500' : 'bg-muted/40 border border-border/60'
               }`}
             >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
           </div>
 
-          {/* Botones */}
+          {/* Buttons */}
           <div className="flex gap-3">
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-amber-500 hover:bg-amber-400 text-background font-semibold"
-            >
+            <Button onClick={handleSave} disabled={saving} className="bg-amber-500 hover:bg-amber-400 text-background font-semibold">
               {saving ? (
                 <span className="flex items-center gap-2">
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-background/30 border-t-background" />
-                  Guardando...
+                  {s.saving}
                 </span>
-              ) : '✓ Guardar configuración'}
+              ) : s.save}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleTest}
-              disabled={testing || !discordId.trim()}
-              className="border-[#5865F2]/40 text-[#7289da] hover:bg-[#5865F2]/10"
-            >
+            <Button variant="outline" onClick={handleTest} disabled={testing || !discordId.trim()} className="border-[#5865F2]/40 text-[#7289da] hover:bg-[#5865F2]/10">
               {testing ? (
                 <span className="flex items-center gap-2">
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Enviando...
+                  {s.testing}
                 </span>
-              ) : '🔔 Enviar mensaje de prueba'}
+              ) : s.testBtn}
             </Button>
           </div>
         </CardContent>
