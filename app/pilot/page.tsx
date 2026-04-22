@@ -268,9 +268,19 @@ export default function PilotPage() {
       }
       const ref = await addDoc(collection(db, 'client_records'), record)
       const key = `${clearForm.clientId}:${clearForm.charId}:${clearForm.bossId}`
-      setClearedKeys((prev) => new Set([...prev, key]))
+      const newClearedKeys = new Set([...clearedKeys, key])
+      setClearedKeys(newClearedKeys)
       setWeekRecords((prev) => ({ ...prev, [key]: { id: ref.id, ...record } as ClientRecord }))
       toast.success(`${clearForm.bossName} marcado como completado.`)
+
+      // Verificar si todos los bosses del personaje quedaron completados esta semana
+      const client = clients.find(c => c.id === clearForm.clientId)
+      const char = client?.characters.find(ch => ch.id === clearForm.charId)
+      const difficulty = char?.selectedBosses.find(b => b.id === clearForm.bossId)?.difficulty ?? ''
+      const weeklyComplete = char?.selectedBosses.length
+        ? char.selectedBosses.every(b => newClearedKeys.has(`${clearForm.clientId}:${clearForm.charId}:${b.id}`))
+        : false
+
       setClearForm(null)
       clearImage()
 
@@ -284,15 +294,12 @@ export default function PilotPage() {
         body: JSON.stringify({
           clientId: clearForm.clientId,
           bossName: clearForm.bossName,
-          difficulty: (() => {
-            const client = clients.find(c => c.id === clearForm.clientId)
-            const char = client?.characters.find(ch => ch.id === clearForm.charId)
-            return char?.selectedBosses.find(b => b.id === clearForm.bossId)?.difficulty ?? ''
-          })(),
+          difficulty,
           characterName: clearForm.charName,
           clearedAt: formDate,
           notes: formNotes || null,
           imageUrl: imageUrls[0] ?? null,
+          weeklyComplete,
         }),
       }).catch(() => { /* silencioso */ })
     } catch (err) {

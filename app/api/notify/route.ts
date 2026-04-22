@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const idToken = authHeader.slice(7)
     await getAdminAuth().verifyIdToken(idToken)
 
-    const { clientId, bossName, difficulty, characterName, clearedAt, notes, imageUrl } = await req.json()
+    const { clientId, bossName, difficulty, characterName, clearedAt, notes, imageUrl, weeklyComplete } = await req.json()
     if (!clientId || !bossName) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 })
     }
@@ -106,6 +106,28 @@ export async function POST(req: NextRequest) {
       es ? `¡Hola **${profile.displayName}**!` : `Hello **${profile.displayName}**!`,
       [embed]
     )
+
+    // Si se completaron todos los bosses del personaje esta semana, enviar DM especial
+    if (weeklyComplete) {
+      const weeklyEmbed = {
+        title: es ? '🏆 ¡Semana Completada!' : '🏆 Weekly Bosses Complete!',
+        color: 0xfbbf24,
+        description: es
+          ? `¡**${characterName}** terminó todos sus bosses semanales! El servicio de esta semana ha concluido. 🎊`
+          : `**${characterName}** has finished all weekly bosses! This week's service is complete. 🎊`,
+        fields: [
+          { name: es ? '🧙 Personaje' : '🧙 Character', value: `**${characterName}**`, inline: true },
+          { name: es ? '📅 Semana' : '📅 Week', value: dateStr, inline: true },
+        ],
+        footer: { text: 'Boss Clear Service — BCS' },
+        timestamp: new Date().toISOString(),
+      }
+      await sendDiscordDM(
+        profile.discordId,
+        '',
+        [weeklyEmbed]
+      )
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err: unknown) {
