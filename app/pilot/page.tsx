@@ -312,11 +312,11 @@ export default function PilotPage() {
 
   const totalPending = clients.reduce((sum, c) =>
     sum + c.characters.reduce((s2, ch) =>
-      s2 + ch.selectedBosses.filter((b) => !clearedKeys.has(`${c.id}:${b.id}`)).length, 0), 0)
+      s2 + ch.selectedBosses.filter((b) => !clearedKeys.has(`${c.id}:${ch.id}:${b.id}`)).length, 0), 0)
 
   const totalDone = clients.reduce((sum, c) =>
     sum + c.characters.reduce((s2, ch) =>
-      s2 + ch.selectedBosses.filter((b) => clearedKeys.has(`${c.id}:${b.id}`)).length, 0), 0)
+      s2 + ch.selectedBosses.filter((b) => clearedKeys.has(`${c.id}:${ch.id}:${b.id}`)).length, 0), 0)
 
   return (
     <div className="space-y-8">
@@ -375,10 +375,10 @@ export default function PilotPage() {
                 {clients.map((client) => {
                   const isExpanded = expandedClient === client.id
                   const clientPending = client.characters.reduce(
-                    (s, ch) => s + ch.selectedBosses.filter((b) => !clearedKeys.has(`${client.id}:${b.id}`)).length, 0
+                    (s, ch) => s + ch.selectedBosses.filter((b) => !clearedKeys.has(`${client.id}:${ch.id}:${b.id}`)).length, 0
                   )
                   const clientDone = client.characters.reduce(
-                    (s, ch) => s + ch.selectedBosses.filter((b) => clearedKeys.has(`${client.id}:${b.id}`)).length, 0
+                    (s, ch) => s + ch.selectedBosses.filter((b) => clearedKeys.has(`${client.id}:${ch.id}:${b.id}`)).length, 0
                   )
 
                   return (
