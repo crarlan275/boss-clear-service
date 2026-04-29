@@ -19,13 +19,22 @@ function formatDate(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-function getWeekStart() {
+// Semana empieza el miércoles a las 8PM hora Venezuela (UTC-4)
+function getWeekStart(): string {
   const now = new Date()
-  const day = now.getDay()
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
-  monday.setHours(0, 0, 0, 0)
-  return monday.toISOString().split('T')[0]
+  const vet = new Date(now.getTime() - 4 * 60 * 60 * 1000)
+  const day  = vet.getUTCDay()
+  const hour = vet.getUTCHours()
+  let daysBack: number
+  if (day === 3)      daysBack = hour >= 20 ? 0 : 7
+  else if (day > 3)   daysBack = day - 3
+  else                daysBack = day + 4
+  const start = new Date(vet)
+  start.setUTCDate(vet.getUTCDate() - daysBack)
+  const y = start.getUTCFullYear()
+  const m = String(start.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(start.getUTCDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 export default function DashboardPage() {

@@ -13,14 +13,26 @@ import { toast } from 'sonner'
 import { diffStyle } from '@/lib/difficulty'
 import type { Profile, MapleCharacter, Boss, ClientRecord } from '@/lib/types'
 
-// Monday of the current week
-function getWeekStart() {
+// Semana empieza el miércoles a las 8PM hora Venezuela (UTC-4)
+function getWeekStart(): string {
   const now = new Date()
-  const day = now.getDay()
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
-  monday.setHours(0, 0, 0, 0)
-  return monday.toISOString().split('T')[0]
+  // Convertir a hora VET (UTC-4)
+  const vet = new Date(now.getTime() - 4 * 60 * 60 * 1000)
+  const day  = vet.getUTCDay()   // 0=Dom 1=Lun 2=Mar 3=Mié 4=Jue 5=Vie 6=Sáb
+  const hour = vet.getUTCHours()
+
+  // Días desde el último reset (mié ≥20h VET)
+  let daysBack: number
+  if (day === 3)      daysBack = hour >= 20 ? 0 : 7
+  else if (day > 3)   daysBack = day - 3
+  else                daysBack = day + 4   // Dom=4 Lun=5 Mar=6
+
+  const start = new Date(vet)
+  start.setUTCDate(vet.getUTCDate() - daysBack)
+  const y = start.getUTCFullYear()
+  const m = String(start.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(start.getUTCDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 interface CharWithBosses extends MapleCharacter {
@@ -239,17 +251,32 @@ export default function PilotPage() {
       const idToken = await auth.currentUser?.getIdToken()
 
       if (formImageFile) {
-        const fd = new FormData()
-        fd.append('file', formImageFile)
-        const uploadRes = await fetch('/api/upload', {
+        // 1. Obtener firma del servidor
+        const signRes = await fetch('/api/upload/sign', {
           method: 'POST',
           headers: { Authorization: `Bearer ${idToken}` },
-          body: fd,
         })
-        if (!uploadRes.ok) throw new Error('Error subiendo imagen')
-        const { url, publicId } = await uploadRes.json()
-        imageUrls = [url]
-        imagePath = publicId       // Cloudinary public_id para referencia
+        if (!signRes.ok) throw new Error('Error obteniendo firma de upload')
+        const { signature, timestamp: ts, apiKey, cloudName, folder } = await signRes.json()
+
+        // 2. Subir directo a Cloudinary desde el cliente (sin pasar por Vercel)
+        const cloudForm = new FormData()
+        cloudForm.append('file', formImageFile)
+        cloudForm.append('api_key', apiKey)
+        cloudForm.append('timestamp', String(ts))
+        cloudForm.append('signature', signature)
+        cloudForm.append('folder', folder)
+
+        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          body: cloudForm,
+        })
+        if (!uploadRes.ok) throw new Error('Error subiendo imagen a Cloudinary')
+        const cloudData = await uploadRes.json()
+        if (cloudData.error) throw new Error(cloudData.error.message)
+
+        imageUrls       = [cloudData.secure_url]
+        imagePath       = cloudData.public_id
         imageUploadedAt = new Date().toISOString()
       }
 
