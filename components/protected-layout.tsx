@@ -33,6 +33,25 @@ export function ProtectedLayout({ children, requireAdmin = false, requirePilot =
     )
   }
 
+  // Blocked user — show message instead of content
+  if (profile?.blocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-sm w-full rounded-xl border border-red-500/30 bg-red-950/20 p-8 text-center space-y-4 backdrop-blur-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-red-500/40 bg-red-500/10 text-2xl">
+            🚫
+          </div>
+          <div>
+            <h2 className="font-cinzel text-xl font-bold text-red-400">Cuenta bloqueada</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tu cuenta ha sido suspendida. Contacta a un administrador si crees que es un error.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const hasPilotAccess = profile?.role === 'pilot' || profile?.role === 'admin' || profile?.isPilot === true
   if (requireAdmin && profile?.role !== 'admin') return null
   if (requirePilot && !hasPilotAccess) return null

@@ -12,6 +12,7 @@ export interface Profile {
   discordId?: string            // Discord User ID para notificaciones (ej: "123456789012345678")
   notificationsEnabled?: boolean // Si el cliente quiere recibir DMs de Discord al completar un boss
   lang?: 'es' | 'en'           // Idioma preferido del cliente
+  blocked?: boolean             // Si true, el usuario está bloqueado y no puede acceder al sistema
 }
 
 export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Chaos' | 'Extreme'

@@ -101,6 +101,11 @@ export default function ClientsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-cinzel font-bold text-foreground">{client.displayName}</span>
+                            {client.blocked && (
+                              <Badge className="border-red-500/40 text-red-400 bg-red-500/10 text-[10px]">
+                                🚫 Bloqueado
+                              </Badge>
+                            )}
                             {pilotName ? (
                               <Badge className="border-violet-500/40 text-violet-400 bg-violet-500/10 text-[10px]">
                                 ⚡ {pilotName}
