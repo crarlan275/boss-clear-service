@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer()
 
+    console.log('[upload] CLOUD:', JSON.stringify(CLOUD), '| KEY len:', KEY?.length, '| KEY:', KEY)
+
     const timestamp = Math.floor(Date.now() / 1000)
     const toSign = `folder=${FOLDER}&timestamp=${timestamp}${SECRET}`
     const signature = createHash('sha1').update(toSign).digest('hex')
