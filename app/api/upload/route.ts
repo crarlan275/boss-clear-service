@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminAuth } from '@/lib/firebase-admin'
 import { createHash } from 'crypto'
 
-const CLOUD = process.env.CLOUDINARY_CLOUD_NAME!
-const KEY   = process.env.CLOUDINARY_API_KEY!
-const SECRET = process.env.CLOUDINARY_API_SECRET!
+const CLOUD = process.env.CLOUDINARY_CLOUD_NAME!.trim()
+const KEY   = process.env.CLOUDINARY_API_KEY!.trim()
+const SECRET = process.env.CLOUDINARY_API_SECRET!.trim()
 const FOLDER = 'boss-clear-service/clears'
 
 async function verifyToken(req: NextRequest) {
@@ -33,8 +33,6 @@ export async function POST(req: NextRequest) {
     if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
     const bytes = await file.arrayBuffer()
-
-    console.log('[upload] CLOUD:', JSON.stringify(CLOUD), '| KEY len:', KEY?.length, '| KEY:', KEY)
 
     const timestamp = Math.floor(Date.now() / 1000)
     const toSign = `folder=${FOLDER}&timestamp=${timestamp}${SECRET}`

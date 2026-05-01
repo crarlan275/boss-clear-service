@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminAuth } from '@/lib/firebase-admin'
 import { createHash } from 'crypto'
 
-const CLOUD  = process.env.CLOUDINARY_CLOUD_NAME!
-const KEY    = process.env.CLOUDINARY_API_KEY!
-const SECRET = process.env.CLOUDINARY_API_SECRET!
+const CLOUD  = process.env.CLOUDINARY_CLOUD_NAME!.trim()
+const KEY    = process.env.CLOUDINARY_API_KEY!.trim()
+const SECRET = process.env.CLOUDINARY_API_SECRET!.trim()
 const FOLDER = 'boss-clear-service/clears'
 
 export async function POST(req: NextRequest) {
