@@ -249,34 +249,26 @@ export default function PilotPage() {
 
       // Obtener token una sola vez — se usa tanto para upload como para notificación
       const idToken = await auth.currentUser?.getIdToken()
+      if (!idToken) throw new Error('Sesión expirada — recarga la página')
 
       if (formImageFile) {
-        // 1. Obtener firma del servidor
-        const signRes = await fetch('/api/upload/sign', {
+        // Subir imagen a través del servidor (evita CORS en upload directo al browser)
+        const uploadForm = new FormData()
+        uploadForm.append('file', formImageFile)
+
+        const uploadRes = await fetch('/api/upload', {
           method: 'POST',
           headers: { Authorization: `Bearer ${idToken}` },
+          body: uploadForm,
         })
-        if (!signRes.ok) throw new Error('Error obteniendo firma de upload')
-        const { signature, timestamp: ts, apiKey, cloudName, folder } = await signRes.json()
+        const uploadData = await uploadRes.json().catch(() => null)
+        if (!uploadRes.ok || !uploadData?.url) {
+          const msg = uploadData?.error ?? `HTTP ${uploadRes.status}`
+          throw new Error(`Error subiendo imagen: ${msg}`)
+        }
 
-        // 2. Subir directo a Cloudinary desde el cliente (sin pasar por Vercel)
-        const cloudForm = new FormData()
-        cloudForm.append('file', formImageFile)
-        cloudForm.append('api_key', apiKey)
-        cloudForm.append('timestamp', String(ts))
-        cloudForm.append('signature', signature)
-        cloudForm.append('folder', folder)
-
-        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-          method: 'POST',
-          body: cloudForm,
-        })
-        if (!uploadRes.ok) throw new Error('Error subiendo imagen a Cloudinary')
-        const cloudData = await uploadRes.json()
-        if (cloudData.error) throw new Error(cloudData.error.message)
-
-        imageUrls       = [cloudData.secure_url]
-        imagePath       = cloudData.public_id
+        imageUrls       = [uploadData.url]
+        imagePath       = uploadData.publicId
         imageUploadedAt = new Date().toISOString()
       }
 
@@ -330,8 +322,8 @@ export default function PilotPage() {
         }),
       }).catch(() => { /* silencioso */ })
     } catch (err) {
-      console.error(err)
-      toast.error('Error registrando la run.')
+      console.error('[submitClear]', err)
+      toast.error(err instanceof Error ? err.message : 'Error registrando la run.')
     } finally {
       setSubmitting(false)
     }
